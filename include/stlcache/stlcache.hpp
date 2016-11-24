@@ -19,6 +19,7 @@ using namespace std;
 #include <stlcache/exceptions.hpp>
 #include <stlcache/policy.hpp>
 #include <stlcache/policy_lru.hpp>
+#include <stlcache/policy_unordered_lru.hpp>
 #include <stlcache/policy_mru.hpp>
 #include <stlcache/policy_lfu.hpp>
 #include <stlcache/policy_lfustar.hpp>

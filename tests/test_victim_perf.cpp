@@ -20,7 +20,7 @@ using namespace stlcache;
 
 BOOST_AUTO_TEST_SUITE(STLCacheSuite)
 
-const unsigned int noItems = 65536;
+const unsigned long noItems = 65536;
 
 BOOST_AUTO_TEST_CASE(victimNone) {
     struct timeval start,stop;
@@ -58,6 +58,25 @@ BOOST_AUTO_TEST_CASE(victimLRU) {
     gettimeofday(&stop, NULL); 
 
     cout<<"Insertion of "<<noItems<<" excessive items into policy_lru cache took "<<((stop.tv_sec-start.tv_sec)*1000)+((stop.tv_usec-start.tv_usec)/1000)<<" milliseconds"<<endl;
+}
+
+BOOST_AUTO_TEST_CASE(victimUnorderedLRU) {
+    struct timeval start,stop;
+
+    cache<unsigned int,unsigned int,policy_unordered_lru> c(noItems);
+    for(unsigned int indx = 0; indx<noItems; indx++) {
+        c.insert(indx,indx);
+    }
+
+    gettimeofday(&start, NULL);
+
+    for(unsigned int indx = noItems; indx<noItems*2; indx++) {
+        c.insert(indx,indx);
+    }
+
+    gettimeofday(&stop, NULL);
+
+    cout<<"Insertion of "<<noItems<<" excessive items into policy_unordered_lru cache took "<<((stop.tv_sec-start.tv_sec)*1000)+((stop.tv_usec-start.tv_usec)/1000)<<" milliseconds"<<endl;
 }
 
 BOOST_AUTO_TEST_CASE(victimMRU) {
