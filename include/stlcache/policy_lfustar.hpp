@@ -16,15 +16,16 @@ using namespace std;
 #include <stlcache/policy.hpp>
 
 namespace stlcache {
-    template <class Key,template <typename T> class Allocator> class _policy_lfustar_type : public virtual _policy_lfu_type<Key,Allocator> {
-        typedef set<Key,less<Key>,Allocator<Key> > keySet;
+    template <class Key,template <typename T> class Container> class _policy_lfustar_type : public virtual _policy_lfu_type<Key,Container> {
+        using keySetType = typename Container<Key>::LFUStarKeySetType ;
+        keySetType keySet;
     public:
-        _policy_lfustar_type(const size_t& size ) throw() : _policy_lfu_type<Key,Allocator>(size) { }
-        _policy_lfustar_type(const _policy_lfustar_type& x ) throw() : _policy_lfu_type<Key,Allocator>(x) { }
+        _policy_lfustar_type(const size_t& size ) throw() : _policy_lfu_type<Key,Container>(size) { }
+        _policy_lfustar_type(const _policy_lfustar_type& x ) throw() : _policy_lfu_type<Key,Container>(x) { }
 
         virtual const _victim<Key> victim() throw()  {
             //LFU* only operates on entries with references count equal to 1
-            typedef typename _policy_lfu_type<Key,Allocator>::entriesType::const_iterator entriesIterType;
+            typedef typename _policy_lfu_type<Key,Container>::entriesType::const_iterator entriesIterType;
             entriesIterType entriesIter = this->entries().find(1);
             if (entriesIter==this->entries().end()) {
                 return _victim<Key>();
@@ -33,6 +34,14 @@ namespace stlcache {
             return _victim<Key>(entriesIter->second);
         }
     };
+
+    template <class Key>
+    struct lfustar_default_container : public lfu_default_container<Key>
+    {
+    	using LFUStarKeySetAllocator = std::allocator<Key> ;
+    	using LFUStarKeySetType = std::set<Key, std::less<Key>, LFUStarKeySetAllocator> ;
+    } ;
+
     /*!
      * \brief A 'LFU*' policy
      * 
@@ -58,10 +67,10 @@ namespace stlcache {
      * \see policu_lfuagingstar 
      */
     struct policy_lfustar {
-        template <typename Key, template <typename T> class Allocator>
-            struct bind : _policy_lfustar_type<Key,Allocator> { 
-                bind(const bind& x) : _policy_lfustar_type<Key,Allocator>(x),_policy_lfu_type<Key,Allocator>(x)  { }
-                bind(const size_t& size) : _policy_lfustar_type<Key,Allocator>(size),_policy_lfu_type<Key,Allocator>(size) { }
+        template <typename Key>
+            struct bind : _policy_lfustar_type<Key, lfustar_default_container> {
+                bind(const bind& x) : _policy_lfustar_type<Key,lfustar_default_container>(x),_policy_lfu_type<Key,lfustar_default_container>(x)  { }
+                bind(const size_t& size) : _policy_lfustar_type<Key,lfustar_default_container>(size),_policy_lfu_type<Key,lfustar_default_container>(size) { }
             };
     };
 }

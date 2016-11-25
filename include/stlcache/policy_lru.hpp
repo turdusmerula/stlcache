@@ -8,25 +8,28 @@
 #ifndef STLCACHE_POLICY_LRU_HPP_INCLUDED
 #define STLCACHE_POLICY_LRU_HPP_INCLUDED
 
-#include <list>
+#include <unordered_map>
 
 using namespace std;
 
 #include <stlcache/policy.hpp>
 
 namespace stlcache {
-    template <class Key,template <typename T> class Allocator> class _policy_lru_type : public policy<Key,Allocator> {
-        list<Key,Allocator<Key> > _entries;
-        typedef typename list<Key,Allocator<Key> >::iterator entriesIterator;
+    template <class Key, template <typename T> class Container>
+    class _policy_lru_type : public policy<Key> {
+        using entriesList = typename Container<Key>::entriesType ;
+        using entriesIterator = typename entriesList::iterator ;
+        entriesList _entries;
 
-        map<Key,entriesIterator,less<Key>,Allocator<pair<Key,entriesIterator> > > _entriesMap;
-        typedef typename map<Key,entriesIterator,less<Key>,Allocator<pair<Key,entriesIterator> > >::iterator entriesMapIterator;
+        using map = typename Container<Key>::entriesMap ;
+        using entriesMapIterator = typename map::iterator ;
+        map _entriesMap ;
     public:
-        _policy_lru_type<Key,Allocator>& operator= ( const _policy_lru_type<Key,Allocator>& x) throw() {
+        _policy_lru_type<Key,Container>& operator= ( const _policy_lru_type<Key,Container>& x) throw() {
             this->_entries=x._entries;
             return *this;
         }
-        _policy_lru_type(const _policy_lru_type<Key,Allocator>& x) throw() {
+        _policy_lru_type(const _policy_lru_type<Key,Container>& x) throw() {
             *this=x;
         }
         _policy_lru_type(const size_t& size ) throw() { }
@@ -55,9 +58,9 @@ namespace stlcache {
         virtual void clear() throw() {
             _entries.clear();
         }
-        virtual void swap(policy<Key,Allocator>& _p) throw(exception_invalid_policy) {
+        virtual void swap(policy<Key>& _p) throw(exception_invalid_policy) {
             try {
-                _policy_lru_type<Key,Allocator>& _pn=dynamic_cast<_policy_lru_type<Key,Allocator>& >(_p);
+                _policy_lru_type<Key,Container>& _pn=dynamic_cast<_policy_lru_type<Key,Container>& >(_p);
                 _entries.swap(_pn._entries);
                 _entriesMap.swap(_pn._entriesMap);
             } catch (const std::bad_cast& ) {
@@ -70,8 +73,20 @@ namespace stlcache {
         }
 
     protected:
-        const list<Key>& entries() const  { return this->_entries; }
+        const entriesList& entries() const  { return this->_entries; }
     };
+
+    template <class Key>
+    struct lru_default_container
+    {
+    	using entriesAllocator = std::allocator<Key> ;
+    	using entriesType = std::list<Key, entriesAllocator> ;
+    	using entriesIterator = typename entriesType::iterator ;
+
+    	using entriesMapAllocator = std::allocator<std::pair<const Key, entriesIterator>> ;
+    	using entriesMap = std::map<Key, entriesIterator, std::less<Key>, entriesMapAllocator> ;
+    	using entriesMapIterator = typename entriesMap::iterator ;
+    } ;
 
     /*!
      * \brief A 'Least Recently Used' policy
@@ -84,10 +99,30 @@ namespace stlcache {
      * No additional configuration is required. 
      */
     struct policy_lru {
-        template <typename Key, template <typename T> class Allocator>
-            struct bind : _policy_lru_type<Key,Allocator> { 
-                bind(const bind& x) : _policy_lru_type<Key,Allocator>(x)  { }
-                bind(const size_t& size) : _policy_lru_type<Key,Allocator>(size) { }
+        template <typename Key>
+            struct bind : _policy_lru_type<Key,lru_default_container> {
+                bind(const bind& x) : _policy_lru_type<Key,lru_default_container>(x)  { }
+                bind(const size_t& size) : _policy_lru_type<Key,lru_default_container>(size) { }
+            };
+    };
+
+    template <class Key>
+    struct lru_unordered_map_container
+    {
+    	using entriesAllocator = std::allocator<Key> ;
+    	using entriesType = std::list<Key, entriesAllocator> ;
+    	using entriesIterator = typename entriesType::iterator ;
+
+    	using entriesMapAllocator = std::allocator<std::pair<const Key, entriesIterator>> ;
+    	using entriesMap = std::unordered_map<Key, entriesIterator, std::hash<Key>, std::equal_to<Key>, entriesMapAllocator> ;
+    	using entriesMapIterator = typename entriesMap::iterator ;
+    } ;
+
+    struct policy_unordered_lru {
+        template <typename Key>
+            struct bind : _policy_lru_type<Key,lru_unordered_map_container> {
+                bind(const bind& x) : _policy_lru_type<Key,lru_unordered_map_container>(x)  { }
+                bind(const size_t& size) : _policy_lru_type<Key,lru_unordered_map_container>(size) { }
             };
     };
 }

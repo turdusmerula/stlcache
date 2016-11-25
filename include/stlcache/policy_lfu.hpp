@@ -16,26 +16,25 @@ using namespace std;
 #include <stlcache/policy.hpp>
 
 namespace stlcache {
-    template <class Key,template <typename T> class Allocator> class _policy_lfu_type : public policy<Key,Allocator> {
+    template <class Key,template <typename T> class Container> class _policy_lfu_type : public policy<Key> {
     protected:
-        typedef pair<const unsigned int, Key> entriesPair;
-        typedef multimap<unsigned int, Key,less<Key> ,Allocator<entriesPair> > entriesType;
+        using entriesPair = typename Container<Key>::LFUEntriesPair ;
+        using entriesType = typename Container<Key>::LFUEntriesType ;
+        using entriesIterator = typename entriesType::iterator ;
         entriesType _entries;
 
-        typedef typename entriesType::iterator entriesIterator;
-        typedef pair<const Key,entriesIterator> backEntriesPair;
-        typedef map<Key,entriesIterator,less<Key>,Allocator<backEntriesPair> > backEntriesType;
+        using backEntriesPair =  typename Container<Key>::LFUBackEntriesPair;
+        using backEntriesType = typename Container<Key>::LFUBackEntriesType;
+        using backEntriesIterator=typename backEntriesType::iterator;
         backEntriesType _backEntries;
-        typedef typename backEntriesType::iterator backEntriesIterator;
         
-
     public:
-        _policy_lfu_type<Key,Allocator>& operator= ( const _policy_lfu_type<Key,Allocator>& x) throw() {
+        _policy_lfu_type<Key,Container>& operator= ( const _policy_lfu_type<Key,Container>& x) throw() {
             this->_entries=x._entries;
             this->_backEntries=x._backEntries;
             return *this;
         }
-        _policy_lfu_type(const _policy_lfu_type<Key,Allocator>& x) throw() {
+        _policy_lfu_type(const _policy_lfu_type<Key,Container>& x) throw() {
             *this=x;
         }
         _policy_lfu_type(const size_t& size ) throw() { }
@@ -75,9 +74,9 @@ namespace stlcache {
             _entries.clear();
             _backEntries.clear();
         }
-        virtual void swap(policy<Key,Allocator>& _p) throw(exception_invalid_policy) {
+        virtual void swap(policy<Key>& _p) throw(exception_invalid_policy) {
             try {
-                _policy_lfu_type<Key,Allocator>& _pn=dynamic_cast<_policy_lfu_type<Key,Allocator>& >(_p);
+                _policy_lfu_type<Key,Container>& _pn=dynamic_cast<_policy_lfu_type<Key,Container>& >(_p);
                 _entries.swap(_pn._entries);
                 _backEntries.swap(_pn._backEntries);
             } catch (const std::bad_cast& ) {
@@ -118,6 +117,19 @@ namespace stlcache {
         }
     };
 
+    template <class Key>
+    struct lfu_default_container
+    {
+    	using LFUEntriesPair = std::pair<const unsigned int, Key> ;
+    	using LFUEntriesAllocator = std::allocator<LFUEntriesPair> ;
+    	using LFUEntriesType = std::multimap<unsigned int, Key, std::less<Key>, LFUEntriesAllocator> ;
+        using LFUEntriesIterator = typename LFUEntriesType::iterator ;
+
+        using LFUBackEntriesPair = std::pair<const Key,LFUEntriesIterator> ;
+    	using LFUBackEntriesAllocator = std::allocator<LFUBackEntriesPair> ;
+    	using LFUBackEntriesType = std::map<Key, LFUEntriesIterator, std::less<Key>, LFUBackEntriesAllocator> ;
+    } ;
+
     /*!
      * \brief A 'Least Frequently Used' policy
      * 
@@ -136,10 +148,10 @@ namespace stlcache {
      *  
      */
     struct policy_lfu {
-        template <typename Key, template <typename T> class Allocator>
-            struct bind : _policy_lfu_type<Key,Allocator> { 
-                bind(const bind& x) : _policy_lfu_type<Key,Allocator>(x)  { }
-                bind(const size_t& size) : _policy_lfu_type<Key,Allocator>(size) { }
+        template <typename Key>
+            struct bind : _policy_lfu_type<Key,lfu_default_container> {
+                bind(const bind& x) : _policy_lfu_type<Key,lfu_default_container>(x)  { }
+                bind(const size_t& size) : _policy_lfu_type<Key,lfu_default_container>(size) { }
             };
     };
 }

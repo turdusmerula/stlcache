@@ -23,16 +23,27 @@ using namespace std;
 #endif /* _MSC_VER */
 
 namespace stlcache {
-    template <time_t Age,class Key,template <typename T> class Allocator> class _policy_lfuagingstar_type : public virtual _policy_lfuaging_type<Age,Key,Allocator>, public virtual _policy_lfustar_type<Key,Allocator> {
+    template <time_t Age,class Key,template <typename T> class Container> class _policy_lfuagingstar_type :
+    		public virtual _policy_lfuaging_type<Age,Key,Container>,
+			public virtual _policy_lfustar_type<Key,Container> {
     public:
-        _policy_lfuagingstar_type(const size_t& size ) throw() : _policy_lfuaging_type<Age,Key,Allocator>(size), _policy_lfustar_type<Key,Allocator>(size),_policy_lfu_type<Key,Allocator>(size) { }
+        _policy_lfuagingstar_type(const size_t& size ) throw() :
+        	_policy_lfuaging_type<Age,Key,Container>(size),
+			_policy_lfustar_type<Key,Container>(size),
+			_policy_lfu_type<Key,Container>(size) { }
 
         virtual const _victim<Key> victim() throw()  {
-			_policy_lfuaging_type<Age,Key,Allocator>::expire();
-            return _policy_lfustar_type<Key,Allocator>::victim();
+			_policy_lfuaging_type<Age,Key,Container>::expire();
+            return _policy_lfustar_type<Key,Container>::victim();
         }
     };
-        /*!
+
+    template <class Key>
+    struct lfuagingstar_default_container : public lfuaging_default_container<Key>, public lfustar_default_container<Key>
+    {
+    } ;
+
+    /*!
      * \brief A 'LFU*-Aging' policy
      * 
      * Combination of \link stlcache::policy_lfustar LFU* \endlink and \link stlcache::policy_lfuaging LFU-Aging \endlink policies.
@@ -54,10 +65,10 @@ namespace stlcache {
      * \see policu_lfustar
      */
     template <time_t Age> struct policy_lfuagingstar {
-        template <typename Key, template <typename T> class Allocator>
-            struct bind : _policy_lfuagingstar_type<Age,Key,Allocator> { 
-                bind(const bind& x) : _policy_lfuagingstar_type<Age,Key,Allocator>(x),_policy_lfuaging_type<Age,Key,Allocator>(x),_policy_lfustar_type<Key,Allocator>(x),_policy_lfu_type<Key,Allocator>(x)  { }
-                bind(const size_t& size) : _policy_lfuagingstar_type<Age,Key,Allocator>(size),_policy_lfuaging_type<Age,Key,Allocator>(size),_policy_lfustar_type<Key,Allocator>(size),_policy_lfu_type<Key,Allocator>(size)  { }
+        template <typename Key>
+            struct bind : _policy_lfuagingstar_type<Age,Key,lfuagingstar_default_container> {
+                bind(const bind& x) : _policy_lfuagingstar_type<Age,Key,lfuagingstar_default_container>(x),_policy_lfuaging_type<Age,Key,lfuagingstar_default_container>(x),_policy_lfustar_type<Key,lfuagingstar_default_container>(x),_policy_lfu_type<Key,lfuagingstar_default_container>(x)  { }
+                bind(const size_t& size) : _policy_lfuagingstar_type<Age,Key,lfuagingstar_default_container>(size),_policy_lfuaging_type<Age,Key,lfuagingstar_default_container>(size),_policy_lfustar_type<Key,lfuagingstar_default_container>(size),_policy_lfu_type<Key,lfuagingstar_default_container>(size)  { }
             };
     };
 }

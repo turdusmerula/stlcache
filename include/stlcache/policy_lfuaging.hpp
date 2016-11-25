@@ -17,47 +17,50 @@ using namespace std;
 #include <stlcache/policy.hpp>
 
 namespace stlcache {
-    template <time_t Age,class Key,template <typename T> class Allocator> class _policy_lfuaging_type : public virtual _policy_lfu_type<Key,Allocator> {
-        typedef set<Key, less<Key>, Allocator<Key> > keySet;
-        map<Key,time_t, less<Key>, Allocator<pair<const Key, time_t> > > _timeKeeper;
+    template <time_t Age,class Key,template <typename T> class Container> class _policy_lfuaging_type : public virtual _policy_lfu_type<Key,Container> {
+        using keyAllocator = typename Container<Key>::LFUAgingKeySetAllocator ;
+    	using keySet = typename Container<Key>::LFUAgingKeySetType ;
+        using timeKeeperType = typename Container<Key>::LFUAgingTimeKeeperType ;
+
+        timeKeeperType _timeKeeper ;
         time_t _oldestEntry;
         time_t age;
     public:
-        _policy_lfuaging_type<Age,Key,Allocator>& operator= ( const _policy_lfuaging_type<Age,Key,Allocator>& x) throw() {
-            _policy_lfu_type<Key,Allocator>::operator=(x);
+        _policy_lfuaging_type<Age,Key,Container>& operator= ( const _policy_lfuaging_type<Age,Key,Container>& x) throw() {
+            _policy_lfu_type<Key,Container>::operator=(x);
             this->_timeKeeper=x._timeKeeper;
             this->_oldestEntry=x._oldestEntry;
             this->age=x.age;
             return *this;
         }
-        _policy_lfuaging_type(const _policy_lfuaging_type<Age,Key,Allocator>& x)  throw() : _policy_lfu_type<Key,Allocator>(x) {
+        _policy_lfuaging_type(const _policy_lfuaging_type<Age,Key,Container>& x)  throw() : _policy_lfu_type<Key,Container>(x) {
             *this=x;
         }
-        _policy_lfuaging_type(const size_t& size ) throw() : _policy_lfu_type<Key,Allocator>(size) { 
+        _policy_lfuaging_type(const size_t& size ) throw() : _policy_lfu_type<Key,Container>(size) {
             this->age=Age;
             this->_oldestEntry=time(NULL);
         }
 
         virtual void insert(const Key& _k) throw(exception_invalid_key) {
-            _policy_lfu_type<Key,Allocator>::insert(_k);
+            _policy_lfu_type<Key,Container>::insert(_k);
             _timeKeeper.insert(std::pair<Key,time_t>(_k,time(NULL))); //Because touch always increases the refcount, so it couldn't be 1 after touch
         }
         virtual void remove(const Key& _k) throw() {
-            _policy_lfu_type<Key,Allocator>::remove(_k);
+            _policy_lfu_type<Key,Container>::remove(_k);
             _timeKeeper.erase(_k);
         }
         virtual void touch(const Key& _k) throw() { 
-            _policy_lfu_type<Key,Allocator>::touch(_k);
+            _policy_lfu_type<Key,Container>::touch(_k);
             _timeKeeper.erase(_k);
             _timeKeeper.insert(std::pair<Key,time_t>(_k,time(NULL))); //Because touch always increases the refcount, so it couldn't be 1 after touch
         }   
         virtual void clear() throw() {
-            _policy_lfu_type<Key,Allocator>::clear();
+            _policy_lfu_type<Key,Container>::clear();
             _timeKeeper.clear();
         }
-        virtual void swap(policy<Key,Allocator>& _p) throw(exception_invalid_policy) {
+        virtual void swap(policy<Key>& _p) throw(exception_invalid_policy) {
             try {
-                _policy_lfuaging_type<Age,Key,Allocator>& _pn=dynamic_cast<_policy_lfuaging_type<Age,Key,Allocator>& >(_p);
+                _policy_lfuaging_type<Age,Key,Container>& _pn=dynamic_cast<_policy_lfuaging_type<Age,Key,Container>& >(_p);
                 _timeKeeper.swap(_pn._timeKeeper);
 
                 time_t _oldest=this->_oldestEntry;
@@ -68,24 +71,24 @@ namespace stlcache {
                 this->age=_pn.age;
                 _pn.age=a;
 
-                _policy_lfu_type<Key,Allocator>::swap(_pn);
+                _policy_lfu_type<Key,Container>::swap(_pn);
             } catch (const std::bad_cast& ) {
                 throw exception_invalid_policy("Attempted to swap incompatible policies");
             }
         }
         virtual const _victim<Key> victim() throw()  {
 			this->expire();
-            return _policy_lfu_type<Key,Allocator>::victim();
+            return _policy_lfu_type<Key,Container>::victim();
         }
 	protected:
 		virtual void expire() {
             if ((_oldestEntry+age)<time(NULL)) {
-                list<Key,Allocator<Key> > toErase;
-                list<Key,Allocator<Key> > toInsert;
+                std::list<Key,keyAllocator> toErase;
+                std::list<Key,keyAllocator> toInsert;
 
                 //Time to clean up
                 this->_oldestEntry=time(NULL);
-                typedef typename map<Key,time_t,less<Key>,Allocator<pair<const Key,time_t> > >::iterator timeMapIterator;
+                using timeMapIterator = typename Container<Key>::LFUAgingTimeKeeperType::iterator ;
                 for (timeMapIterator it=_timeKeeper.begin();it!=_timeKeeper.end();++it) {
                     if ((*it).second+age<time(NULL)) {
                         //Too old :(
@@ -104,7 +107,7 @@ namespace stlcache {
                 }
 
                 //Delete entries
-                typedef typename list<Key,Allocator<Key> >::iterator listIterator;
+                typedef typename list<Key,keyAllocator>::iterator listIterator;
                 for(listIterator it=toErase.begin();it!=toErase.end();++it) {
                     _timeKeeper.erase(*it);
                 }
@@ -114,6 +117,16 @@ namespace stlcache {
             }
 		}
     };
+
+    template <class Key>
+    struct lfuaging_default_container : public lfu_default_container<Key>
+    {
+    	using LFUAgingKeySetAllocator = std::allocator<Key> ;
+    	using LFUAgingKeySetType = std::set<Key, std::less<Key>, LFUAgingKeySetAllocator> ;
+
+    	using LFUAgingTimeKeeperAllocator = std::allocator<pair<const Key, time_t>> ;
+    	using LFUAgingTimeKeeperType = std::map<Key, time_t, std::less<Key>, LFUAgingTimeKeeperAllocator> ;
+    } ;
 
     /*!
      * \brief A 'LFU-Aging' policy
@@ -139,10 +152,10 @@ namespace stlcache {
      * \see policu_lfuagingstar 
      */
     template <time_t Age> struct policy_lfuaging {
-        template <typename Key, template <typename T> class Allocator>
-            struct bind : _policy_lfuaging_type<Age,Key,Allocator> { 
-                bind(const bind& x) : _policy_lfuaging_type<Age,Key,Allocator>(x),_policy_lfu_type<Key,Allocator>(x)  { }
-                bind(const size_t& size) : _policy_lfuaging_type<Age,Key,Allocator>(size),_policy_lfu_type<Key,Allocator>(size) { }
+        template <typename Key>
+            struct bind : _policy_lfuaging_type<Age,Key,lfuaging_default_container> {
+                bind(const bind& x) : _policy_lfuaging_type<Age,Key,lfuaging_default_container>(x),_policy_lfu_type<Key,lfuaging_default_container>(x)  { }
+                bind(const size_t& size) : _policy_lfuaging_type<Age,Key,lfuaging_default_container>(size),_policy_lfu_type<Key,lfuaging_default_container>(size) { }
             };
     };
 }

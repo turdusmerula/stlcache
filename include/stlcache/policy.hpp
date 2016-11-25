@@ -64,7 +64,7 @@ namespace stlcache {
      * 
      * \author chollya (5/19/2011)
      */
-    template <class Key,template <typename T> class Allocator> class policy {
+    template <class Key> class policy {
     public:
         /*!
          * \brief handles insertion of a key to the cache
@@ -129,7 +129,7 @@ namespace stlcache {
          * \see cache::swap 
          *  
          */
-        virtual void swap(policy<Key,Allocator>& _p) throw(exception_invalid_policy)=0;
+        virtual void swap(policy<Key>& _p) throw(exception_invalid_policy)=0;
 
         /*!
          * \brief Returns a key of the entry, that is expired by the policy and could be removed.
@@ -145,16 +145,21 @@ namespace stlcache {
          * \see cache::insert 
          */
         virtual const _victim<Key> victim() throw()  =0;
+
+        virtual ~policy() {
+        }
     };
 
-    template <class Key, template <typename T> class Allocator> class _policy_none_type : public policy<Key,Allocator> {
-        set<Key,less<Key>,Allocator<Key> > _entries;
+    template <class Key, template <typename T> class Container>
+    class _policy_none_type : public policy<Key> {
+        using set = typename Container<Key>::set ;
+        set _entries;
     public:
-        _policy_none_type<Key,Allocator>& operator= ( const _policy_none_type<Key,Allocator>& x) throw() {
+        _policy_none_type<Key, Container>& operator= ( const _policy_none_type<Key, Container>& x) throw() {
             this->_entries=x._entries;
             return *this;
         }
-        _policy_none_type(const _policy_none_type<Key,Allocator>& x) throw() {
+        _policy_none_type(const _policy_none_type<Key,Container>& x) throw() {
             *this=x;
         }
         _policy_none_type(const size_t& size ) throw() { }
@@ -169,9 +174,9 @@ namespace stlcache {
         virtual void clear() throw() {
             _entries.clear();
         }
-        virtual void swap(policy<Key,Allocator>& _p) throw(exception_invalid_policy) {
+        virtual void swap(policy<Key>& _p) throw(exception_invalid_policy) {
             try {
-                _policy_none_type<Key,Allocator>& _pn=dynamic_cast<_policy_none_type<Key,Allocator>& >(_p);
+                _policy_none_type<Key,Container>& _pn=dynamic_cast<_policy_none_type<Key,Container>& >(_p);
                 _entries.swap(_pn._entries);
             } catch (const std::bad_cast& ) {
                 throw exception_invalid_policy("Attempted to swap incompatible policies");
@@ -186,6 +191,13 @@ namespace stlcache {
         }
     };
 
+    template <class Key>
+    struct none_set_container
+    {
+    	using setAllocator = std::allocator<Key> ;
+    	using set = std::set<Key, std::less<Key>, setAllocator> ;
+    } ;
+
     /*!
      * \brief A 'random' expiration policy implementation 
      *  
@@ -194,10 +206,10 @@ namespace stlcache {
      * \author chollya (5/19/2011)
      */
     struct policy_none {
-        template <typename Key, template <typename T> class Allocator>
-            struct bind : _policy_none_type<Key,Allocator> { 
-                bind(const bind& x) : _policy_none_type<Key,Allocator>(x)  { }
-                bind(const size_t& size) : _policy_none_type<Key,Allocator>(size) { }
+        template <typename Key>
+            struct bind : _policy_none_type<Key,none_set_container> {
+                bind(const bind& x) : _policy_none_type<Key,none_set_container>(x)  { }
+                bind(const size_t& size) : _policy_none_type<Key,none_set_container>(size) { }
             };
     };
 }

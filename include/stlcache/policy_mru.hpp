@@ -15,15 +15,19 @@ using namespace std;
 #include <stlcache/policy_lru.hpp>
 
 namespace stlcache {
-    template <class Key,template <typename T> class Allocator> class _policy_mru_type : public _policy_lru_type<Key,Allocator> {
+    template <class Key,template <typename T> class Container> class _policy_mru_type : public _policy_lru_type<Key,Container> {
     public:
-        _policy_mru_type(const size_t& size ) throw() : _policy_lru_type<Key,Allocator>(size) { }
+        _policy_mru_type(const size_t& size ) throw() : _policy_lru_type<Key,Container>(size) { }
 
         virtual const _victim<Key> victim() throw()  {
             return _victim<Key>(this->entries().front());
         }
     };
 
+    template <class Key>
+    struct mru_default_container : public lru_default_container<Key>
+    {
+    } ;
 
     /*!
      * \brief A 'Most Recently Used' policy
@@ -37,10 +41,10 @@ namespace stlcache {
      * No additional configuration is required. 
      */
     struct policy_mru {
-        template <typename Key, template <typename T> class Allocator>
-            struct bind : _policy_mru_type<Key,Allocator> { 
-                bind(const bind& x) : _policy_mru_type<Key,Allocator>(x)  { }
-                bind(const size_t& size) : _policy_mru_type<Key,Allocator>(size) { }
+        template <typename Key>
+            struct bind : _policy_mru_type<Key,mru_default_container> {
+                bind(const bind& x) : _policy_mru_type<Key,mru_default_container>(x)  { }
+                bind(const size_t& size) : _policy_mru_type<Key,mru_default_container>(size) { }
             };
     };
 }

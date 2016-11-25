@@ -19,7 +19,6 @@ using namespace std;
 #include <stlcache/exceptions.hpp>
 #include <stlcache/policy.hpp>
 #include <stlcache/policy_lru.hpp>
-#include <stlcache/policy_unordered_lru.hpp>
 #include <stlcache/policy_mru.hpp>
 #include <stlcache/policy_lfu.hpp>
 #include <stlcache/policy_lfustar.hpp>
@@ -305,7 +304,7 @@ namespace stlcache {
          storageType _storage;
          std::size_t _maxEntries;
          std::size_t _currEntries;
-         typedef typename Policy::template bind<Key,Allocator> policy_type;
+         typedef typename Policy::template bind<Key> policy_type;
          policy_type* _policy;
          Allocator<policy_type> policyAlloc;
 

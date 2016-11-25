@@ -15,20 +15,25 @@ using namespace std;
 #include <stlcache/policy.hpp>
 
 namespace stlcache {
-    template <class Key,template <typename T> class Allocator> class _policy_adaptive_type : public policy<Key,Allocator> {
-        size_t _size;
-        _policy_lru_type<Key,Allocator> T1;
-        set<Key,less<Key>,Allocator<Key> > t1Entries;
-        _policy_lru_type<Key,Allocator> B1;
-        set<Key,less<Key>,Allocator<Key> > b1Entries;
+    template <class Key,template <typename T> class Container> class _policy_adaptive_type : public policy<Key> {
+    	using keyAllocator = typename Container<Key>::AdaptativeKeyAllocator ;
+    	using lruMapContainer = typename Container<Key>::AdaptativeLruMapContainer ;
+    	using lfuMapContainer = typename Container<Key>::AdaptativeLfuMapContainer ;
+    	using EntriesType = typename Container<Key>::AdaptativeEntriesType ;
 
-        _policy_lfu_type<Key,Allocator> T2;
-        set<Key,less<Key>,Allocator<Key> > t2Entries;
-        _policy_lfu_type<Key,Allocator> B2;
-        set<Key,less<Key>,Allocator<Key> > b2Entries;
+    	size_t _size;
+    	lruMapContainer T1;
+    	EntriesType t1Entries;
+        lruMapContainer B1;
+        EntriesType b1Entries;
+
+        lfuMapContainer T2;
+        EntriesType t2Entries;
+        lfuMapContainer B2;
+        EntriesType b2Entries;
 
     public:
-        _policy_adaptive_type<Key,Allocator>& operator= ( const _policy_adaptive_type<Key,Allocator>& x) throw() {
+        _policy_adaptive_type<Key,Container>& operator= ( const _policy_adaptive_type<Key,Container>& x) throw() {
             this->_size=x._size;
 
             this->T1=x.T1;
@@ -42,7 +47,7 @@ namespace stlcache {
 
             return *this;
         }
-        _policy_adaptive_type(const _policy_adaptive_type<Key,Allocator>& x) throw() : T1(x.T1),T2(x.T2),B1(x.B1),B2(x.B2) {
+        _policy_adaptive_type(const _policy_adaptive_type<Key,Container>& x) throw() : T1(x.T1),T2(x.T2),B1(x.B1),B2(x.B2) {
             this->_size=x._size;
 
             this->t1Entries=x.t1Entries;
@@ -120,9 +125,9 @@ namespace stlcache {
             B2.clear();
             b2Entries.clear();
         }
-        virtual void swap(policy<Key,Allocator>& _p) throw(exception_invalid_policy) {
+        virtual void swap(policy<Key>& _p) throw(exception_invalid_policy) {
             try {
-                _policy_adaptive_type<Key,Allocator>& _pn=dynamic_cast<_policy_adaptive_type<Key,Allocator>& >(_p);
+                _policy_adaptive_type<Key,Container>& _pn=dynamic_cast<_policy_adaptive_type<Key,Container>& >(_p);
                 T1.swap(_pn.T1);
                 T2.swap(_pn.T2);
                 B1.swap(_pn.B1);
@@ -145,6 +150,17 @@ namespace stlcache {
         }
     };
 
+    template <class Key>
+    struct adaptative_default_container
+    {
+    	using AdaptativeKeyAllocator = std::allocator<Key> ;
+
+    	using AdaptativeLruMapContainer = _policy_lru_type<Key, lru_default_container> ;
+    	using AdaptativeLfuMapContainer = _policy_lfu_type<Key, lfu_default_container> ;
+
+    	using AdaptativeEntriesType = std::set<Key, std::less<Key>, AdaptativeKeyAllocator> ;
+    } ;
+
     /*!
      * \brief A 'Adaptive replacement' policy
      * 
@@ -158,10 +174,10 @@ namespace stlcache {
      *  
      */
     struct policy_adaptive {
-        template <typename Key, template <typename T> class Allocator>
-            struct bind : _policy_adaptive_type<Key,Allocator> { 
-                bind(const bind& x) : _policy_adaptive_type<Key,Allocator>(x)  { }
-                bind(const size_t& size) : _policy_adaptive_type<Key,Allocator>(size) { }
+        template <typename Key>
+            struct bind : _policy_adaptive_type<Key,adaptative_default_container> {
+                bind(const bind& x) : _policy_adaptive_type<Key,adaptative_default_container>(x)  { }
+                bind(const size_t& size) : _policy_adaptive_type<Key,adaptative_default_container>(size) { }
             };
     };
 }
