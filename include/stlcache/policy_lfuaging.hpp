@@ -12,8 +12,6 @@
 #include <map>
 #include <ctime>
 
-using namespace std;
-
 #include <stlcache/policy.hpp>
 
 namespace stlcache {
@@ -107,7 +105,7 @@ namespace stlcache {
                 }
 
                 //Delete entries
-                typedef typename list<Key,keyAllocator>::iterator listIterator;
+                typedef typename std::list<Key,keyAllocator>::iterator listIterator;
                 for(listIterator it=toErase.begin();it!=toErase.end();++it) {
                     _timeKeeper.erase(*it);
                 }
@@ -124,7 +122,7 @@ namespace stlcache {
     	using LFUAgingKeySetAllocator = std::allocator<Key> ;
     	using LFUAgingKeySetType = std::set<Key, std::less<Key>, LFUAgingKeySetAllocator> ;
 
-    	using LFUAgingTimeKeeperAllocator = std::allocator<pair<const Key, time_t>> ;
+    	using LFUAgingTimeKeeperAllocator = std::allocator<std::pair<const Key, time_t>> ;
     	using LFUAgingTimeKeeperType = std::map<Key, time_t, std::less<Key>, LFUAgingTimeKeeperAllocator> ;
     } ;
 

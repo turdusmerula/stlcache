@@ -11,6 +11,7 @@
 #include <stlcache/stlcache.hpp>
 
 using namespace stlcache;
+using namespace std;
 
 BOOST_AUTO_TEST_SUITE(STLCacheSuite)
 

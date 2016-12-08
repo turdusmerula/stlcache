@@ -10,8 +10,6 @@
 
 #include <unordered_map>
 
-using namespace std;
-
 #include <stlcache/policy.hpp>
 
 namespace stlcache {
@@ -36,7 +34,7 @@ namespace stlcache {
 
         virtual void insert(const Key& _k) throw(exception_invalid_key) {
             entriesIterator entryIter = _entries.insert(_entries.begin(),_k);
-            _entriesMap.insert(pair<Key,entriesIterator>(_k,entryIter));
+            _entriesMap.insert(std::pair<Key,entriesIterator>(_k,entryIter));
         }
         virtual void remove(const Key& _k) throw() {
             entriesMapIterator mapIter = _entriesMap.find(_k);

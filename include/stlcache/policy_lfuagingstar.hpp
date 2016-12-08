@@ -12,8 +12,6 @@
 #include <map>
 #include <ctime>
 
-using namespace std;
-
 #include <stlcache/policy.hpp>
 #include <stlcache/policy_lfuaging.hpp>
 #include <stlcache/policy_lfustar.hpp>

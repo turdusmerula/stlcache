@@ -14,8 +14,6 @@
 
 #include <map>
 
-using namespace std;
-
 #include <stlcache/exceptions.hpp>
 #include <stlcache/policy.hpp>
 #include <stlcache/policy_lru.hpp>
@@ -296,11 +294,11 @@ namespace stlcache {
         class Key, 
         class Data, 
         class Policy, 
-        class Compare = less<Key>, 
-        template <typename T> class Allocator = allocator 
+        class Compare = std::less<Key>,
+        template <typename T> class Allocator = std::allocator
     >
     class cache {
-        typedef map<Key,Data,Compare,Allocator<pair<const Key, Data> > > storageType; 
+        typedef std::map<Key,Data,Compare,Allocator<std::pair<const Key, Data> > > storageType;
          storageType _storage;
          std::size_t _maxEntries;
          std::size_t _currEntries;
@@ -317,13 +315,13 @@ namespace stlcache {
         typedef Data                                                               mapped_type;
         /*! \brief Combined key,value type 
           */
-        typedef pair<const Key, Data>                                         value_type;
+        typedef std::pair<const Key, Data>                                         value_type;
         /*! \brief Compare type used by this instance
           */
         typedef Compare                                                          key_compare;
         /*! \brief Allocator type used by this instance 
           */
-        typedef Allocator<pair<const Key, Data> >                          allocator_type;
+        typedef Allocator<std::pair<const Key, Data> >                          allocator_type;
         /*! \brief Nested class to compare elements (see member function value_comp) 
           */
         typedef typename storageType::value_compare                                value_compare;
@@ -638,7 +636,7 @@ namespace stlcache {
          * 
          */
         explicit cache(const size_type size, const Compare& comp = Compare()) throw() {
-            this->_storage=storageType(comp, Allocator<pair<const Key, Data> >());
+            this->_storage=storageType(comp, Allocator<std::pair<const Key, Data> >());
             this->_maxEntries=size;
             this->_currEntries=0;
 

@@ -10,8 +10,6 @@
 
 #include <set>
 
-using namespace std;
-
 #include <stlcache/exceptions.hpp>
 #include <stlcache/victim.hpp>
 

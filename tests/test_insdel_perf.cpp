@@ -13,10 +13,11 @@
 #else 
 #include <sys/time.h>
 #endif /* _WIN32 */
-
+#include <iostream>
 #include <stlcache/stlcache.hpp>
 
 using namespace stlcache;
+using namespace std;
 
 BOOST_AUTO_TEST_SUITE(STLCacheSuite)
 

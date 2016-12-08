@@ -11,8 +11,6 @@
 #include <set>
 #include <map>
 
-using namespace std;
-
 #include <stlcache/policy.hpp>
 
 namespace stlcache {
