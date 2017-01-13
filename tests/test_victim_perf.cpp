@@ -26,7 +26,7 @@ const unsigned long noItems = 65536;
 BOOST_AUTO_TEST_CASE(victimNone) {
     struct timeval start,stop;
 
-    cache<unsigned int,unsigned int,policy_none> c(noItems);
+    cache_map<unsigned int,unsigned int,policy_none> c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(victimNone) {
 BOOST_AUTO_TEST_CASE(victimLRU) {
     struct timeval start,stop;
 
-    cache<unsigned int,unsigned int,policy_lru> c(noItems);
+    cache_map<unsigned int,unsigned int,policy_lru> c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(victimLRU) {
 BOOST_AUTO_TEST_CASE(victimUnorderedLRU) {
     struct timeval start,stop;
 
-    cache<unsigned int,unsigned int,policy_unordered_lru> c(noItems);
+    cache_map<unsigned int,unsigned int,policy_unordered_lru> c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(victimUnorderedLRU) {
 BOOST_AUTO_TEST_CASE(victimMRU) {
     struct timeval start,stop;
 
-    cache<unsigned int,unsigned int,policy_mru> c(noItems);
+    cache_map<unsigned int,unsigned int,policy_mru> c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(victimMRU) {
 BOOST_AUTO_TEST_CASE(victimLFU) {
     struct timeval start,stop;
 
-    cache<unsigned int,unsigned int,policy_lfu> c(noItems);
+    cache_map<unsigned int,unsigned int,policy_lfu> c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(victimLFU) {
 BOOST_AUTO_TEST_CASE(victimLFUStar) {
     struct timeval start,stop;
 
-    cache<unsigned int,unsigned int,policy_lfustar> c(noItems);
+    cache_map<unsigned int,unsigned int,policy_lfustar> c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(victimLFUStar) {
 BOOST_AUTO_TEST_CASE(victimLFUAging) {
     struct timeval start,stop;
 
-    cache<unsigned int,unsigned int,policy_lfuaging<3600> > c(noItems);
+    cache_map<unsigned int,unsigned int,policy_lfuaging<3600> > c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(victimLFUAging) {
 BOOST_AUTO_TEST_CASE(victimLFUAgingStar) {
     struct timeval start,stop;
 
-    cache<unsigned int,unsigned int,policy_lfuagingstar<3600> > c(noItems);
+    cache_map<unsigned int,unsigned int,policy_lfuagingstar<3600> > c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(victimLFUAgingStar) {
 BOOST_AUTO_TEST_CASE(insertAdaptive) {
     struct timeval start,stop;
 
-    cache<unsigned int,unsigned int,policy_adaptive> c(noItems);
+    cache_map<unsigned int,unsigned int,policy_adaptive> c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }

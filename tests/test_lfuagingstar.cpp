@@ -25,7 +25,7 @@ using namespace std;
 BOOST_AUTO_TEST_SUITE(STLCacheSuite)
 
 BOOST_AUTO_TEST_CASE(lastInserted) {
-    cache<int,string,policy_lfuagingstar<3600> > c1(3);
+    cache_map<int,string,policy_lfuagingstar<3600> > c1(3);
 
     c1.insert(1,"data1");
     c1.insert(2,"data2");
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(lastInserted) {
 }
 
 BOOST_AUTO_TEST_CASE(touch) {
-    cache<int,string,policy_lfuagingstar<3600> > c1(3);
+    cache_map<int,string,policy_lfuagingstar<3600> > c1(3);
 
     c1.insert(1,"data1");
     c1.insert(2,"data2");
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(touch) {
 }
 
 BOOST_AUTO_TEST_CASE(veryfrequent) {
-    cache<int,string,policy_lfuagingstar<3600> > c1(3);
+    cache_map<int,string,policy_lfuagingstar<3600> > c1(3);
 
     c1.insert(1,"data1");
     c1.insert(2,"data2");
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(veryfrequent) {
 }
 
 BOOST_AUTO_TEST_CASE(expire) {
-    cache<int,string,policy_lfuagingstar<1> > c1(3);
+    cache_map<int,string,policy_lfuagingstar<1> > c1(3);
 
     c1.insert(1,"data1");
     c1.insert(2,"data2");
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(expire) {
 }
 
 BOOST_AUTO_TEST_CASE(expirefail) {
-    cache<int,string,policy_lfuagingstar<1> > c1(3);
+    cache_map<int,string,policy_lfuagingstar<1> > c1(3);
 
     c1.insert(1,"data1");
     c1.insert(2,"data2");

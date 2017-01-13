@@ -16,7 +16,7 @@ using namespace std;
 BOOST_AUTO_TEST_SUITE(STLCacheSuite)
 
 BOOST_AUTO_TEST_CASE(sizeLimit) {
-    cache<int,string,policy_none> c1(3);
+    cache_map<int,string,policy_none> c1(3);
 
     c1.insert(1,"data1");
     c1.insert(2,"data2");
