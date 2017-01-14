@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(insdelNone) {
 
     gettimeofday(&start, NULL); 
 
-    cache_map<unsigned int,unsigned int,policy_none> c(noItems);
+    cache<unsigned int,unsigned int,policy_none> c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(insdelLRU) {
 
     gettimeofday(&start, NULL); 
 
-    cache_map<unsigned int,unsigned int,policy_lru> c(noItems);
+    cache<unsigned int,unsigned int,policy_lru> c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(insdelMRU) {
 
     gettimeofday(&start, NULL); 
 
-    cache_map<unsigned int,unsigned int,policy_mru> c(noItems);
+    cache<unsigned int,unsigned int,policy_mru> c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(insdelLFU) {
 
     gettimeofday(&start, NULL); 
 
-    cache_map<unsigned int,unsigned int,policy_lfu> c(noItems);
+    cache<unsigned int,unsigned int,policy_lfu> c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(insdelLFUStar) {
 
     gettimeofday(&start, NULL); 
 
-    cache_map<unsigned int,unsigned int,policy_lfustar> c(noItems);
+    cache<unsigned int,unsigned int,policy_lfustar> c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(insdelLFUAging) {
 
     gettimeofday(&start, NULL); 
 
-    cache_map<unsigned int,unsigned int,policy_lfuaging<3600> > c(noItems);
+    cache<unsigned int,unsigned int,policy_lfuaging<3600> > c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(insdelLFUAgingStar) {
 
     gettimeofday(&start, NULL); 
 
-    cache_map<unsigned int,unsigned int,policy_lfuagingstar<3600> > c(noItems);
+    cache<unsigned int,unsigned int,policy_lfuagingstar<3600> > c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(insdelAdaptive) {
 
     gettimeofday(&start, NULL); 
 
-    cache_map<unsigned int,unsigned int,policy_adaptive> c(noItems);
+    cache<unsigned int,unsigned int,policy_adaptive> c(noItems);
     for(unsigned int indx = 0; indx<noItems; indx++) {
         c.insert(indx,indx);
     }

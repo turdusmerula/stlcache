@@ -8,6 +8,8 @@
 #ifndef STLCACHE_CONTAINER_HPP_INCLUDED
 #define STLCACHE_CONTAINER_HPP_INCLUDED
 
+#include <map>
+
 namespace stlcache {
     /*! \brief Abstract interface cache container.
      * 
@@ -24,10 +26,6 @@ namespace stlcache {
      * 
      * \author chollya (5/19/2016)
      */
-    template <class Key, class Data>
-    struct container {
-    };
-
 }
 
 #endif /* STLCACHE_CONTAINER_HPP_INCLUDED */

@@ -16,7 +16,7 @@ using namespace std;
 BOOST_AUTO_TEST_SUITE(STLCacheSuite)
 
 BOOST_AUTO_TEST_CASE(checkVictim) {
-    cache_map<int,string,policy_adaptive > c1(3);
+    cache<int,string,policy_adaptive,container_map> c1(3);
 
     c1.insert(1,"data1");
     c1.insert(2,"data2");
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(checkVictim) {
 }
 
 BOOST_AUTO_TEST_CASE(checkPointerMove) {
-    cache_map<int,string,policy_adaptive > c1(3);
+    cache<int,string,policy_adaptive,container_unordered_map> c1(3);
 
     c1.insert(1,"data1");
     c1.insert(2,"data2");
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(checkPointerMove) {
 }
 
 BOOST_AUTO_TEST_CASE(checkPointerMoveT2) {
-    cache_map<int,string,policy_adaptive> c1(3);
+    cache<int,string,policy_adaptive> c1(3);
 
     c1.insert(1,"data1");
     c1.insert(2,"data2");
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(checkPointerMoveT2) {
 }
 
 BOOST_AUTO_TEST_CASE(checkPointerSaveB1) {
-    cache_map<int,string,policy_adaptive> c1(4);
+    cache<int,string,policy_adaptive> c1(4);
 
     c1.insert(1,"data1");
     c1.insert(2,"data2");
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(checkPointerSaveB1) {
 }
 
 BOOST_AUTO_TEST_CASE(checkPointerSaveB2) {
-    cache_map<int,string,policy_adaptive> c1(4);
+    cache<int,string,policy_adaptive> c1(4);
 
     c1.insert(1,"data1");
     c1.insert(2,"data2");

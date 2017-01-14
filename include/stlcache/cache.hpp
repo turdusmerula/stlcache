@@ -5,20 +5,18 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef STLCACHE_STLCACHE_UNORDERED_MULTIMAP_HPP_INCLUDED
-#define STLCACHE_STLCACHE_UNORDERED_MULTIMAP_HPP_INCLUDED
+#ifndef STLCACHE_CACHE_HPP_INCLUDED
+#define STLCACHE_CACHE_HPP_INCLUDED
 
 #ifdef _MSC_VER
 #pragma warning( disable : 4290 )
 #endif /* _MSC_VER */
 
-#include <map>
-
 #include <stlcache/exceptions.hpp>
 
 namespace stlcache {
 
-    /*! \brief Cache is a kind of a multimap that have limited number of elements to store and configurable policy for autoremoval of excessive elements.
+    /*! \brief Cache is a kind of a map that have limited number of elements to store and configurable policy for autoremoval of excessive elements.
      *  
      * The cache behaviour resembles a std::map behaviour (but not yet fully compatible with usual std::map interface), but it adds a limitation of 
      * maximum number of entries, stored in cache and  provides a configurable policy, which is used to remove entries when the cache is full. 
@@ -67,60 +65,74 @@ namespace stlcache {
         class Key, 
         class Data, 
         class Policy, 
-        class Compare = std::hash<Key>,
-        template <typename T> class Allocator = std::allocator
+        class Container = container_unordered_map
     >
-    class cache_unordered_multimap {
-        typedef std::unordered_multimap<Key,Data,Compare,Allocator<std::pair<const Key, Data> > > storageType;
-         storageType _storage;
-         std::size_t _maxEntries;
-         std::size_t _currEntries;
-         typedef typename Policy::template bind<Key> policy_type;
-         policy_type* _policy;
-         Allocator<policy_type> policyAlloc;
+    class cache {
+    	using container_type = typename Container::template bind<Key,Data> ;
+		using storage_type = typename container_type::map_type ;
+		using policy_type = typename Policy::template bind<Key> ;
+		using policy_allocator_type = typename container_type::template allocator_type<policy_type> ;
+
+		storage_type _storage;
+		std::size_t _maxEntries;
+		std::size_t _currEntries;
+		policy_type* _policy;
+		policy_allocator_type policyAlloc;
 
     public:
         /*! \brief The Key type 
          */
-        typedef Key                                                                key_type;
+        using key_type = Key ;
         /*!  \brief The Data type 
          */
-        typedef Data                                                               mapped_type;
+        using mapped_type = Data ;
         /*! \brief Combined key,value type 
           */
-        typedef std::pair<const Key, Data>                                         value_type;
+        using value_type = std::pair<const Key, Data> ;
         /*! \brief Compare type used by this instance
           */
-        typedef Compare                                                          key_compare;
+        using key_compare = typename container_type::compare_type ;
         /*! \brief Allocator type used by this instance 
           */
-        typedef Allocator<std::pair<const Key, Data> >                          allocator_type;
+        using allocator_type = typename container_type::template allocator_type<std::pair<const Key, Data>> ;
         /*! \brief Nested class to compare elements (see member function value_comp) 
           */
-        typedef typename storageType::value_compare                                value_compare;
+        using value_compare = typename container_type::compare_type ;
         /*! \brief Allocator::reference 
           */
-        typedef typename storageType::reference                                        reference;
+        using reference = typename storage_type::reference ;
         /*! \brief Allocator::const_reference 
           */
-        typedef typename storageType::const_reference                               const_reference;
+        using const_reference = typename storage_type::const_reference ;
         /*! \brief Type used for storing object sizes, specific to a current platform (usually a size_t) 
           */
-        typedef typename storageType::size_type                                       size_type;
+        using size_type = typename storage_type::size_type ;
         /*! \brief Type used for address calculations, specific to a current platform (usually a ptrdiff_t) 
           */
-        typedef typename storageType::difference_type                               difference_type;
+        using difference_type = typename storage_type::difference_type ;
         /*! \brief Allocator::pointer 
           */
-        typedef typename storageType::pointer                                          pointer;
+        using pointer = typename storage_type::pointer ;
         /*! \brief Allocator::const_pointer 
           */
-        typedef typename storageType::const_pointer                                 const_pointer;
+        using const_pointer = typename storage_type::const_pointer ;
 
         /*! \name std::map interface wrappers 
          *  Simple wrappers for std::map calls, that we are using only for mimicking the map interface
          */
+
         //@{
+
+        /*! \brief storage object accessor
+          *
+          *  Provides access to the storage object, used to constuct the container.
+          *
+          *  \return The storage object of type std::map<Key,Data,Compare,Allocator<std::pair<const Key, Data>>>.
+          */
+        const storage_type& get_storage() const {
+        	return _storage ;
+        }
+
         /*! \brief Allocator object accessor
           *                                                                                                                                          
           *  Provides access to the allocator object, used to constuct the container.
@@ -220,7 +232,7 @@ namespace stlcache {
          *  
          * \see cache::operator= 
          */
-        void swap ( cache_unordered_multimap<Key,Data,Policy,Compare,Allocator>& mp ) throw(exception_invalid_policy) {
+        void swap ( cache<Key,Data,Policy,Container>& mp ) throw(exception_invalid_policy) {
             _storage.swap(mp._storage);
             _policy->swap(*mp._policy);
 
@@ -377,7 +389,7 @@ namespace stlcache {
          *  
          * \see swap 
          */
-        cache_unordered_multimap<Key,Data,Policy,Compare,Allocator>& operator= ( const cache_unordered_multimap<Key,Data,Policy,Compare,Allocator>& x) throw() {
+        cache<Key,Data,Policy,Container>& operator= ( const cache<Key,Data,Policy,Container>& x) throw() {
             this->_storage=x._storage;
             this->_maxEntries=x._maxEntries;
             this->_currEntries=this->_storage.size();
@@ -395,7 +407,7 @@ namespace stlcache {
          *  
          *  \param <x> a cache object with the same template parameters 
          */
-        cache_unordered_multimap(const cache_unordered_multimap<Key,Data,Policy,Compare,Allocator>& x) throw() {
+        cache(const cache<Key,Data,Policy,Container>& x) throw() {
             *this=x;
         }
         /*!
@@ -405,11 +417,10 @@ namespace stlcache {
          * You could also  pass optional comparator object, compatible with Compare. 
          *  
          * \param <size> Maximum number of entries, allowed in the cache. 
-         * \param <comp> Comparator object, compatible with Compare type. Defaults to Compare() 
          * 
          */
-        explicit cache_unordered_multimap(const size_type size, const Compare& comp = Compare()) throw() {
-            this->_storage=storageType(comp, Allocator<std::pair<const Key, Data> >());
+        explicit cache(const size_type size) throw() {
+            this->_storage=storage_type();
             this->_maxEntries=size;
             this->_currEntries=0;
 
@@ -424,7 +435,7 @@ namespace stlcache {
          * Destructs the cache object. This calls each of the cache element's destructors, and deallocates all the storage capacity allocated by the cache. 
          * 
          */
-        ~cache_unordered_multimap() {
+        ~cache() {
             policyAlloc.destroy(this->_policy);
             policyAlloc.deallocate(this->_policy,1);
         }
@@ -432,4 +443,4 @@ namespace stlcache {
     };
 }
 
-#endif /* STLCACHE_STLCACHE_UNORDERED_MULTIMAP_HPP_INCLUDED */
+#endif /* STLCACHE_STLCACHE_MAP_HPP_INCLUDED */

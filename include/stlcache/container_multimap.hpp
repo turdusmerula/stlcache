@@ -8,14 +8,23 @@
 #ifndef STLCACHE_CONTAINER_MULTIMAP_HPP_INCLUDED
 #define STLCACHE_CONTAINER_MULTIMAP_HPP_INCLUDED
 
-#include <map>
-
 namespace stlcache {
 
-	template <class Key, class Data, class Compare=std::less<Key>, class Allocator=std::allocator<std::pair<const Key, Data>>>
-    struct container_multimap {
-		using storageType = std::multimap<Key, Data, Compare, allocator> ;
-    };
+	template <class Key, class Data>
+	struct _container_multimap_type {
+		using compare_type = std::less<Key> ;
+
+		template <class T>
+		using allocator_type = std::allocator<T> ;
+
+		using multimap_type = std::multimap<Key, Data, compare_type, allocator_type<std::pair<const Key, Data>> > ;
+	};
+
+	struct container_multimap {
+		template <class Key, class Data>
+		struct bind : _container_multimap_type<Key,Data> {
+		} ;
+	};
 
 }
 

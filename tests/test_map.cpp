@@ -16,12 +16,12 @@ using namespace std;
 BOOST_AUTO_TEST_SUITE(STLCacheSuite)
 
 BOOST_AUTO_TEST_CASE(construction) {
-    cache_map<int,string,policy_none> cache1(10);
+    cache<int,string,policy_none> cache1(10);
 
-    cache_map<int,string,policy_none> cache2(5);
+    cache<int,string,policy_none> cache2(5);
     cache2=cache1;
 
-    cache_map<int,string,policy_none> cache3(cache1);
+    cache<int,string,policy_none> cache3(cache1);
 
     BOOST_CHECK(cache1.max_size()==10);
     BOOST_CHECK(cache1.size()==0);
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(construction) {
 }
 
 BOOST_AUTO_TEST_CASE(data) {
-    cache_map<int,string,policy_none> c(10);
+    cache<int,string,policy_none> c(10);
 
     BOOST_CHECK(c.empty());
     BOOST_CHECK(c.size()==0);
@@ -77,17 +77,17 @@ BOOST_AUTO_TEST_CASE(data) {
 }
 
 BOOST_AUTO_TEST_CASE(copy) {
-    cache_map<int,string,policy_none> c1(10);
+    cache<int,string,policy_none> c1(10);
 
     c1.insert(1,"data1");
     c1.insert(2,"data2");
 
-    cache_map<int,string,policy_none> c2(c1);
+    cache<int,string,policy_none> c2(c1);
 
     BOOST_CHECK(!c2.fetch(1).compare("data1"));
     BOOST_CHECK(!c2.fetch(2).compare("data2"));
 
-    cache_map<int,string,policy_none> c3(5);
+    cache<int,string,policy_none> c3(5);
     c3.insert(3,"data3");
     c3.insert(4,"data4");
 

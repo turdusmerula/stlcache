@@ -13,6 +13,7 @@
 #endif /* _MSC_VER */
 
 #include <map>
+#include <unordered_map>
 
 #include <stlcache/exceptions.hpp>
 #include <stlcache/policy.hpp>
@@ -24,10 +25,17 @@
 #include <stlcache/policy_lfuagingstar.hpp>
 #include <stlcache/policy_adaptive.hpp>
 
-#include <stlcache/cache_map.hpp>
-#include <stlcache/cache_multimap.hpp>
-#include <stlcache/cache_unordered_map.hpp>
-#include <stlcache/cache_unordered_multimap.hpp>
+#include <stlcache/container.hpp>
+
+#include <stlcache/container_map.hpp>
+#include <stlcache/container_unordered_map.hpp>
+#include <stlcache/cache.hpp>
+
+//TODO: multicache is not yet functional
+//#include <stlcache/container_multimap.hpp>
+//#include <stlcache/container_unordered_multimap.hpp>
+//#include <stlcache/multicache.hpp>
+
 
 namespace stlcache {
 
